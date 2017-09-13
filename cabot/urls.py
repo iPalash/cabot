@@ -175,31 +175,13 @@ def append_plugin_urls():
         try:
             _module = import_module('%s.urls' % plugin)
         except Exception as e:
-            pass
+            if not e.message.startswith('No module named'):
+                raise
         else:
             urlpatterns += [
                 url(r'^plugins/%s/' % plugin, include('%s.urls' % plugin))
             ]
 
-    for plugin_name in settings.CABOT_CUSTOM_CHECK_PLUGINS_PARSED:
-        if plugin_name != '':
-            try:
-                plugin = import_module(plugin_name + ".plugin")
-            except Exception as e:
-                pass
-            else:
-                check_name = plugin_name.replace('cabot_check_', '')
-                createViewClass = getattr(plugin, '%sCheckCreateView' % check_name.capitalize())
-                updateViewClass = getattr(plugin, '%sCheckUpdateView' % check_name.capitalize())
-                duplicateFunction = getattr(plugin, 'duplicate_check')
-                urlpatterns += [
-                    url(r'^%scheck/create/' % check_name, view=createViewClass.as_view(),
-                       name='create-' + check_name + '-check'),
-                    url(r'^%scheck/update/(?P<pk>\d+)/' % check_name,
-                       view=updateViewClass.as_view(), name='update-' + check_name + '-check'),
-                    url(r'^%scheck/duplicate/(?P<pk>\d+)/' % check_name,
-                       view=duplicateFunction, name='duplicate-' + check_name + '-check')
-                ]
 
 append_plugin_urls()
 
