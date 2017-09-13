@@ -1,38 +1,44 @@
-from django.conf.urls import include, url
-from django.conf import settings
-from cabot.cabotapp.views import (
-    about, run_status_check, graphite_api_data, checks_run_recently,
-    duplicate_icmp_check, duplicate_graphite_check, duplicate_http_check, duplicate_jenkins_check,
-    duplicate_instance, acknowledge_alert, remove_acknowledgement,
-    GraphiteCheckCreateView, GraphiteCheckUpdateView,
-    HttpCheckCreateView, HttpCheckUpdateView,
-    ICMPCheckCreateView, ICMPCheckUpdateView,
-    JenkinsCheckCreateView, JenkinsCheckUpdateView,
-    StatusCheckDeleteView, StatusCheckListView, StatusCheckDetailView,
-    StatusCheckResultDetailView, StatusCheckReportView, UserProfileUpdateAlert,
-    PluginSettingsView, AlertTestView, AlertTestPluginView, SetupView)
-
-from cabot.cabotapp.views import (InstanceListView, InstanceDetailView,
-    InstanceUpdateView, InstanceCreateView, InstanceDeleteView,
-    ServiceListView, ServicePublicListView, ServiceDetailView,
-    ServiceUpdateView, ServiceCreateView, ServiceDeleteView,
-    UserProfileUpdateView, ShiftListView, subscriptions)
-
-from cabot.cabotapp.utils import cabot_needs_setup
+import logging
+from importlib import import_module
 
 from cabot import rest_urls
+from cabot.cabotapp.models import get_custom_check_plugins
+from cabot.cabotapp.utils import cabot_needs_setup
+from cabot.cabotapp.views import (AlertTestPluginView, AlertTestView,
+                                  GraphiteCheckCreateView,
+                                  GraphiteCheckUpdateView, HttpCheckCreateView,
+                                  HttpCheckUpdateView, ICMPCheckCreateView,
+                                  ICMPCheckUpdateView, InstanceCreateView,
+                                  InstanceDeleteView, InstanceDetailView,
+                                  InstanceListView, InstanceUpdateView,
+                                  JenkinsCheckCreateView,
+                                  JenkinsCheckUpdateView, PluginSettingsView,
+                                  ServiceCreateView, ServiceDeleteView,
+                                  ServiceDetailView, ServiceListView,
+                                  ServicePublicListView, ServiceUpdateView,
+                                  SetupView, ShiftListView,
+                                  StatusCheckDeleteView, StatusCheckDetailView,
+                                  StatusCheckListView, StatusCheckReportView,
+                                  StatusCheckResultDetailView,
+                                  UserProfileUpdateAlert,
+                                  UserProfileUpdateView, about,
+                                  acknowledge_alert, checks_run_recently,
+                                  duplicate_graphite_check,
+                                  duplicate_http_check, duplicate_icmp_check,
+                                  duplicate_instance, duplicate_jenkins_check,
+                                  graphite_api_data, remove_acknowledgement,
+                                  run_status_check, subscriptions)
+from django.conf import settings
+from django.conf.urls import include, url
+from django.contrib import admin
+from django.contrib.auth.views import (login, logout, password_reset,
+                                       password_reset_confirm,
+                                       password_reset_done)
+from django.shortcuts import redirect
+from django.views.generic.base import RedirectView
 from rest_framework.documentation import include_docs_urls
 
-from django.contrib import admin
-from django.views.generic.base import RedirectView
-from django.shortcuts import redirect
-from django.contrib.auth.views import login, logout, password_reset, password_reset_done, password_reset_confirm
 admin.autodiscover()
-
-from importlib import import_module
-import logging
-#from cabot.settings import CABOT_CUSTOM_CHECK_PLUGINS_PARSED as CABOT_CUSTOM_CHECK_PLUGINS
-
 logger = logging.getLogger(__name__)
 
 def first_time_setup_wrapper(func):
